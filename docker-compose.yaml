@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  flat_back:
+    build: ./flat_back
+    container_name: flat_back_c
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./flat_back:/app
+  flat_front:
+    build: ./flat_front
+    container_name: flat_front_c
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./flat_front:/app
+    stdin_open: true
+    tty: true
