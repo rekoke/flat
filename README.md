@@ -1,7 +1,15 @@
-## Run docker containers : docker-compose up
+## Getting Started
 
-## Stop docker and delete containers:  docker-compose down --rmi all -v 
+* Run docker containers:
+```
+  docker-compose up
+```
 
-### Front: PORT 3000
+* Stop docker and delete containers:
+```
+  docker-compose down --rmi all -v 
+```
 
-### Back: PORT 4000
+* Frontend: PORT 3000
+
+* Backend: PORT 4000
