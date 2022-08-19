@@ -11,17 +11,16 @@ function App() {
     fetch('http://localhost:4000/products')
     .then(res => res.json())
     .then(data => setProducts(data))
-  }, [name]);
+  }, []);
 
   const handleOnChange = () => {
     setFav(!fav);
   };
   let handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('fav', fav);
     try {
-      let res = await fetch("http://localhost:4000/products", {
-        method: "POST",
+      await fetch('http://localhost:4000/products', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -29,23 +28,26 @@ function App() {
           id: 0,
           name: name,
           price: parseFloat(price),
-          is_fav: fav
+          is_fav: fav,
         }),
-      });
-      if (res.status === 201) {
+      }).then((res) => {
+        if(res.ok){
+          return res.json()
+        }
+        throw new Error('Something went wrong');
+      })
+      .then((data) => {
         setName("");
         setPrice("");
         setFav(false);
         setMessage("User created successfully");
-      } else {
-        setMessage("Some error occured");
-      }
+        setProducts(data)
+      });
     } catch (err) {
       console.log(err);
     }
   };
 
-  console.log('products:', products);
   return (
     <div className="App">
       <header className="App-header">
@@ -66,7 +68,7 @@ function App() {
           placeholder="price"
           onChange={(e) => setPrice(e.target.value)}
         />
-        <label for="isfav">is fav</label>
+        <label htmlFor="isfav">is fav</label>
         <input 
           type="checkbox"
           id="isfav"
@@ -76,7 +78,7 @@ function App() {
 
         />
 
-        <button type="submit">Create</button>
+        <button type="submit">Create mf</button>
 
         <div className="message">{message ? <p>{message}</p> : null}</div>
       </form>

@@ -7,6 +7,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "http://localhost:4000",
+    "http://localhost:4000/products"
 ]
 
 app.add_middleware(
@@ -30,6 +32,7 @@ items = [
     Product(id=1, name="Product name 1", price=111),
     Product(id=2, name="Product name 2", price=222),
     Product(id=3, name="Product name 3", price=333),
+    Product(id=4, name="Product name 4", price=444),
 ]
 
 
@@ -40,4 +43,4 @@ async def get_products():
 @app.post("/products", status_code=201)
 async def add_product(product: Product):
     items.append(product)
-    return json.loads(product)
+    return items
