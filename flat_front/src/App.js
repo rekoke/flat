@@ -17,49 +17,72 @@ function App() {
     setFav(!fav);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await fetch('http://localhost:4000/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: 0,
-          name: name,
-          price: parseFloat(price),
-          is_fav: fav,
-        }),
-      }).then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        throw new Error('Something went wrong');
-      })
-          .then((data) => {
-            setName('');
-            setPrice('');
-            setFav(false);
-            setMessage('User created successfully');
-            setProducts(data);
-          });
-    } catch (err) {
-      console.log(err);
-    }
+  const deleteItem = async (itemId) => {
+    await fetch(`http://localhost:4000/products/${itemId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          }
+          throw new Error('Something went wrong');
+        })
+        .then((data) => {
+          setProducts(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetch('http://localhost:4000/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        price: parseFloat(price),
+        is_fav: fav,
+      }),
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      throw new Error('Something went wrong');
+    })
+        .then((data) => {
+          setName('');
+          setPrice('');
+          setFav(false);
+          setMessage('User created successfully');
+          setProducts(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+  };
   return (
     <div className="App">
       <header className="App-header">
-        <h1> all productos</h1>
-        {products && products.map((product) => (
-          <div key={product.id}>
-            {product.name}-{product.price}-{product.is_fav ? 'true' : 'false'}
-          </div>
-        ))}
+        <h1> all products</h1>
       </header>
       <main>
+        {products.length ? products.map((product) => (
+          <div key={product.id}>
+            <span>
+              {product.id}-
+              {product.name}-{product.price}-{product.is_fav ? 'true' : 'false'}
+            </span>
+            <button onClick={() => deleteItem(product.id)}>X</button>
+          </div>
+        )) : <div> No products on your list </div>}
+        <button> Add product </button>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -81,7 +104,7 @@ function App() {
             checked={fav}
             onChange={handleOnChange}
           />
-          <button type="submit">Create mf</button>
+          <button disabled={!name || !price} type="submit">Create mf</button>
           <div className="message">{message ? <p>{message}</p> : null}</div>
         </form>
       </main>
