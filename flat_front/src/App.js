@@ -1,11 +1,13 @@
 import {useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
+import Form from './components/Form';
+import SimpleList from './components/SimpleList';
+
 
 function App() {
   const [products, setProducts] = useState([]);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState(0);
-  const [fav, setFav] = useState(false);
   const [message, setMessage] = useState('');
+  const [viewForm, setviewForm] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:4000/products')
@@ -13,8 +15,11 @@ function App() {
         .then((data) => setProducts(data));
   }, []);
 
-  const handleOnChange = () => {
-    setFav(!fav);
+  const displayMessage = (message) => {
+    setMessage(message);
+    setTimeout(() => {
+      setMessage('');
+    }, 2000);
   };
 
   const deleteItem = async (itemId) => {
@@ -31,6 +36,7 @@ function App() {
           throw new Error('Something went wrong');
         })
         .then((data) => {
+          displayMessage('User deleted successfully');
           setProducts(data);
         })
         .catch((err) => {
@@ -38,7 +44,7 @@ function App() {
         });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, data) => {
     e.preventDefault();
     await fetch('http://localhost:4000/products', {
       method: 'POST',
@@ -46,9 +52,9 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: name,
-        price: parseFloat(price),
-        is_fav: fav,
+        name: data.name,
+        price: parseFloat(data.price),
+        is_fav: data.fav,
       }),
     }).then((res) => {
       if (res.ok) {
@@ -57,11 +63,9 @@ function App() {
       throw new Error('Something went wrong');
     })
         .then((data) => {
-          setName('');
-          setPrice('');
-          setFav(false);
-          setMessage('User created successfully');
+          displayMessage('User created successfully');
           setProducts(data);
+          setviewForm(false);
         })
         .catch((err) => {
           console.log(err);
@@ -71,42 +75,23 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1> all products</h1>
+        <nav>
+          <Link to="add">Add</Link>
+        </nav>
       </header>
       <main>
-        {products.length ? products.map((product) => (
-          <div key={product.id}>
-            <span>
-              {product.id}-
-              {product.name}-{product.price}-{product.is_fav ? 'true' : 'false'}
-            </span>
-            <button onClick={() => deleteItem(product.id)}>X</button>
-          </div>
-        )) : <div> No products on your list </div>}
-        <button> Add product </button>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={name}
-            placeholder="Name"
-            onChange={(e) => setName(e.target.value)}
+        <SimpleList products={products} deleteItem={deleteItem}/>
+        { !viewForm && <button onClick={() => setviewForm(!viewForm)}>
+          Add product
+        </button>
+        }
+        { viewForm &&
+          <Form
+            setviewForm={setviewForm}
+            handleSubmit={handleSubmit}
           />
-          <input
-            type="number"
-            value={price}
-            placeholder="price"
-            onChange={(e) => setPrice(e.target.value)}
-          />
-          <label htmlFor="isfav">is fav</label>
-          <input
-            type="checkbox"
-            id="isfav"
-            name="isfav"
-            checked={fav}
-            onChange={handleOnChange}
-          />
-          <button disabled={!name || !price} type="submit">Create mf</button>
-          <div className="message">{message ? <p>{message}</p> : null}</div>
-        </form>
+        }
+        { message && <div className="message"> <p>{message}</p></div> }
       </main>
     </div>
   );
